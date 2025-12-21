@@ -28,6 +28,7 @@ espeakup
 ethtool
 exfatprogs
 f2fs-tools
+fastfetch
 fatresize
 foot-terminfo
 fsarchiver
@@ -73,7 +74,6 @@ mtools
 nano
 nbd
 ndisc6
-neofetch
 nfs-utils
 nilfs-utils
 nmap
