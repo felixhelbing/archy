@@ -1,0 +1,25 @@
+name: Build ISO
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        run: |
+          pacman-key --init
+          pacman -Syu --noconfirm archlinux-keyring archiso
+      - name: Build ISO
+        run: mkarchiso -v -o out .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: archlinux-iso
+          path: out/*.iso
+
