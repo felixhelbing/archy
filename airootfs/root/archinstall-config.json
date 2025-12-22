@@ -8,5 +8,6 @@
     "gfx_driver": "All open-source"
   },
   "additional-repositories": ["multilib"],
-  "packages": ["fastfetch", "htop"]
+  "packages": ["fastfetch", "htop", "ly"],
+  "custom_commands": ["systemctl enable ly.service"]
 }
