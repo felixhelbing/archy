@@ -1,0 +1,12 @@
+{
+  "bootloader": "systemd-bootctl",
+  "profile_config": {
+    "profile": {
+      "main": "desktop",
+      "details": ["Hyprland"]
+    },
+    "gfx_driver": "All open-source"
+  },
+  "additional-repositories": ["multilib"],
+  "packages": ["fastfetch", "htop"]
+}
