@@ -1,5 +1,5 @@
 {
-  "bootloader": "systemd-bootctl",
+  "bootloader": "Systemd-boot",
   "profile_config": {
     "profile": {
       "main": "desktop",
