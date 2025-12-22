@@ -9,5 +9,5 @@
   },
   "additional-repositories": ["multilib"],
   "packages": ["fastfetch", "htop", "ly"],
-  "custom_commands": ["systemctl enable ly.service"]
+  "custom_commands": ["systemctl enable ly@tty2.service"]
 }
