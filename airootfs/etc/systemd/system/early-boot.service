@@ -1,0 +1,13 @@
+[Unit]
+Description=early boot script
+DefaultDependencies=no
+After=systemd-udev-settle.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/early-boot.sh
+
+[Install]
+WantedBy=sysinit.target
+

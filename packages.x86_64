@@ -128,3 +128,5 @@ xdg-utils
 xfsprogs
 xl2tpd
 zsh
+rofi
+ghostty
