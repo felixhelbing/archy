@@ -9,3 +9,8 @@ alias q=nvim
 alias w='clear && eza -lhA --group-directories-first'
 alias c=clear
 
+# environment
+
+export EDITOR=nvim
+export VISUAL=nvim
+export TERMINAL=ghostty

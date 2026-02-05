@@ -16,9 +16,47 @@ cleanup() {
 trap cleanup EXIT
 
 # --- preflight ---
-for c in lsblk sgdisk partprobe mkfs.fat mkfs.ext4 cryptsetup pacstrap genfstab arch-chroot blkid awk sed dd mountpoint; do
+for c in lsblk sgdisk partprobe mkfs.fat mkfs.ext4 cryptsetup pacstrap genfstab arch-chroot blkid awk sed dd mountpoint ping; do
   require "$c"
 done
+
+# --- network (ethernet first, wifi via iwctl if needed) ---
+ensure_network() {
+  # Fast path: already online
+  if ping -c 1 -W 1 archlinux.org >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo
+  echo "No working internet connection detected."
+  echo "If you have Ethernet, plug it in now. Otherwise connect via WiFi."
+  echo
+
+  # Try again after user has a chance to plug Ethernet
+  sleep 2
+  if ping -c 1 -W 1 archlinux.org >/dev/null 2>&1; then
+    return 0
+  fi
+
+  # WiFi fallback using iwd
+  require iwctl
+  echo "Launching iwctl for WiFi setup. When connected, exit iwctl."
+  echo "Tip: station <wlanX> scan ; station <wlanX> get-networks ; station <wlanX> connect <SSID>"
+  echo
+  iwctl
+
+  # Verify connectivity (try a couple of times to allow DHCP)
+  for _ in {1..10}; do
+    if ping -c 1 -W 1 archlinux.org >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  die "Still no internet after WiFi setup."
+}
+
+ensure_network
 
 # --- disk selection (filter out USB + removable) ---
 echo "== Disks (USB filtered out) =="
@@ -42,22 +80,16 @@ read -rp "Select disk number to ERASE and install to: " IDX
 (( IDX < ${#DISK_LINES[@]} )) || die "Out of range."
 
 DISK="$(echo "${DISK_LINES[$IDX]}" | awk '{print $1}')"
-echo
-echo "Selected: $DISK"
-echo "THIS WILL WIPE ALL DATA ON $DISK."
-read -rp "Type YES to continue: " CONFIRM
-[[ "$CONFIRM" == "YES" ]] || die "Aborted."
 
-# --- passwords / user ---
 read -rsp "LUKS password: " LUKS_PW; echo
-read -rsp "Repeat LUKS password: " LUKS_PW2; echo
+read -rsp "LUKS password: " LUKS_PW2; echo
 [[ "$LUKS_PW" == "$LUKS_PW2" ]] || die "LUKS passwords do not match."
 
-read -rp "Username (will be created): " USERNAME
+read -rp "Username: " USERNAME
 [[ "$USERNAME" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "Invalid username."
 
 read -rsp "User password: " USER_PW; echo
-read -rsp "Repeat user password: " USER_PW2; echo
+read -rsp "User password: " USER_PW2; echo
 [[ "$USER_PW" == "$USER_PW2" ]] || die "User passwords do not match."
 
 # --- CPU microcode selection ---
@@ -107,6 +139,19 @@ PACSTRAP_PKGS=(base linux linux-firmware networkmanager sudo git)
 
 pacstrap -K /mnt "${PACSTRAP_PKGS[@]}"
 genfstab -U /mnt >> /mnt/etc/fstab
+
+
+# --- seed /etc/skel in target system (must happen BEFORE useradd -m) ---
+INSTALLER_SKEL_SRC="/usr/share/installer/skel"
+INSTALLER_SKEL_DST="/mnt/etc/skel"
+
+[[ -d "$INSTALLER_SKEL_SRC" ]] || die "Missing installer skel dir: $INSTALLER_SKEL_SRC"
+
+mkdir -p "$INSTALLER_SKEL_DST"
+cp -an "$INSTALLER_SKEL_SRC"/. "$INSTALLER_SKEL_DST"/
+
+
+
 
 # --- stash secrets AFTER pacstrap ---
 SECRETS_DIR="/mnt/root/.install-secrets"
@@ -189,4 +234,4 @@ CHROOT
 
 # --- SUCCESS ---
 trap - EXIT
-echo "✅ Install done. Rebooting is safe now."
+echo "Install done. Rebooting is safe now."

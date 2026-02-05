@@ -128,5 +128,10 @@ xdg-utils
 xfsprogs
 xl2tpd
 zsh
-rofi
 ghostty
+hyprland
+xdg-desktop-portal-hyprland
+xdg-desktop-portal
+wlroots
+rofi
+neovim
