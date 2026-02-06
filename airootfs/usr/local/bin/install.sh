@@ -90,15 +90,11 @@ fi
 DISK="$(echo "${DISK_LINES[$IDX]}" | awk '{print $1}')"
 
 read -rsp "LUKS password: " LUKS_PW; echo
-read -rsp "LUKS password: " LUKS_PW2; echo
-[[ "$LUKS_PW" == "$LUKS_PW2" ]] || die "LUKS passwords do not match."
 
 read -rp "Username: " USERNAME
 [[ "$USERNAME" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "Invalid username."
 
 read -rsp "User password: " USER_PW; echo
-read -rsp "User password: " USER_PW2; echo
-[[ "$USER_PW" == "$USER_PW2" ]] || die "User passwords do not match."
 
 # --- CPU microcode selection ---
 UCPKG=""
