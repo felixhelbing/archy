@@ -144,7 +144,7 @@ mount "$EFI" /mnt/boot
 # --- install base system ---
 PACSTRAP_PKGS=(base base-devel linux linux-firmware networkmanager sudo git
   mesa hyprland uwsm xdg-desktop-portal-hyprland xdg-desktop-portal
-  rofi ghostty neovim emacs)
+  rofi ghostty neovim emacs waybar)
 [[ -n "$UCPKG" ]] && PACSTRAP_PKGS+=("$UCPKG")
 
 pacstrap -K /mnt "${PACSTRAP_PKGS[@]}"
@@ -159,6 +159,8 @@ INSTALLER_SKEL_DST="/mnt/etc/skel"
 
 mkdir -p "$INSTALLER_SKEL_DST"
 cp -a "$INSTALLER_SKEL_SRC"/. "$INSTALLER_SKEL_DST"/
+chmod +x "$INSTALLER_SKEL_DST"/.local/bin/install-brave
+chmod +x "$INSTALLER_SKEL_DST"/.local/bin/install-librewolf
 
 # --- stash secrets AFTER pacstrap ---
 SECRETS_DIR="/mnt/root/.install-secrets"
