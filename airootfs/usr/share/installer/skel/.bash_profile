@@ -16,7 +16,7 @@ export PATH
 
 if [ ! -f "$HOME/.no-hyprland" ]; then
   if [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-    Hyprland || echo "Hyprland failed. Dropping to shell."
+    uwsm start hyprland-uwsm.desktop || echo "Hyprland failed. Dropping to shell."
   fi
 fi
 

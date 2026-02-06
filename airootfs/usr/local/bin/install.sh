@@ -68,16 +68,24 @@ mapfile -t DISK_LINES < <(
 
 ((${#DISK_LINES[@]})) || die "No suitable non-USB disks found."
 
-for i in "${!DISK_LINES[@]}"; do
-  name="$(echo "${DISK_LINES[$i]}" | awk '{print $1}')"
-  size="$(echo "${DISK_LINES[$i]}" | awk '{print $2}')"
-  model="$(echo "${DISK_LINES[$i]}" | cut -d' ' -f3- | sed 's/  *disk .*//')"
-  printf "[%d] %s  (%s, %s)\n" "$i" "$name" "$size" "$model"
-done
+if (( ${#DISK_LINES[@]} == 1 )); then
+  IDX=0
+  name="$(echo "${DISK_LINES[0]}" | awk '{print $1}')"
+  size="$(echo "${DISK_LINES[0]}" | awk '{print $2}')"
+  model="$(echo "${DISK_LINES[0]}" | cut -d' ' -f3- | sed 's/  *disk .*//')"
+  echo "One disk found: $name ($size, $model)"
+else
+  for i in "${!DISK_LINES[@]}"; do
+    name="$(echo "${DISK_LINES[$i]}" | awk '{print $1}')"
+    size="$(echo "${DISK_LINES[$i]}" | awk '{print $2}')"
+    model="$(echo "${DISK_LINES[$i]}" | cut -d' ' -f3- | sed 's/  *disk .*//')"
+    printf "[%d] %s  (%s, %s)\n" "$i" "$name" "$size" "$model"
+  done
 
-read -rp "Select disk number to ERASE and install to: " IDX
-[[ "$IDX" =~ ^[0-9]+$ ]] || die "Not a number."
-(( IDX < ${#DISK_LINES[@]} )) || die "Out of range."
+  read -rp "Select disk number to ERASE and install to: " IDX
+  [[ "$IDX" =~ ^[0-9]+$ ]] || die "Not a number."
+  (( IDX < ${#DISK_LINES[@]} )) || die "Out of range."
+fi
 
 DISK="$(echo "${DISK_LINES[$IDX]}" | awk '{print $1}')"
 
@@ -135,8 +143,8 @@ mount "$EFI" /mnt/boot
 
 # --- install base system ---
 PACSTRAP_PKGS=(base linux linux-firmware networkmanager sudo git
-  mesa hyprland xdg-desktop-portal-hyprland xdg-desktop-portal
-  rofi ghostty neovim)
+  mesa hyprland uwsm xdg-desktop-portal-hyprland xdg-desktop-portal
+  rofi ghostty neovim emacs)
 [[ -n "$UCPKG" ]] && PACSTRAP_PKGS+=("$UCPKG")
 
 pacstrap -K /mnt "${PACSTRAP_PKGS[@]}"
