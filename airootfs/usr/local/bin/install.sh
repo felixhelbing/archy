@@ -148,10 +148,7 @@ INSTALLER_SKEL_DST="/mnt/etc/skel"
 [[ -d "$INSTALLER_SKEL_SRC" ]] || die "Missing installer skel dir: $INSTALLER_SKEL_SRC"
 
 mkdir -p "$INSTALLER_SKEL_DST"
-cp -an "$INSTALLER_SKEL_SRC"/. "$INSTALLER_SKEL_DST"/
-
-
-
+cp -a "$INSTALLER_SKEL_SRC"/. "$INSTALLER_SKEL_DST"/
 
 # --- stash secrets AFTER pacstrap ---
 SECRETS_DIR="/mnt/root/.install-secrets"
