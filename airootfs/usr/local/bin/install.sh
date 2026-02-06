@@ -134,7 +134,9 @@ mkdir -p /mnt/boot
 mount "$EFI" /mnt/boot
 
 # --- install base system ---
-PACSTRAP_PKGS=(base linux linux-firmware networkmanager sudo git)
+PACSTRAP_PKGS=(base linux linux-firmware networkmanager sudo git
+  mesa hyprland xdg-desktop-portal-hyprland xdg-desktop-portal
+  rofi ghostty neovim)
 [[ -n "$UCPKG" ]] && PACSTRAP_PKGS+=("$UCPKG")
 
 pacstrap -K /mnt "${PACSTRAP_PKGS[@]}"

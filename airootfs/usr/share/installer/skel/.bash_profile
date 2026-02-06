@@ -16,7 +16,7 @@ export PATH
 
 if [ ! -f "$HOME/.no-hyprland" ]; then
   if [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-    exec Hyprland
+    Hyprland || echo "Hyprland failed. Dropping to shell."
   fi
 fi
 
