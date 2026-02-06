@@ -9,4 +9,3 @@ if [ -d /sys/class/backlight ] && ls /sys/class/backlight/* >/dev/null 2>&1; the
     fi
   done
 fi
-

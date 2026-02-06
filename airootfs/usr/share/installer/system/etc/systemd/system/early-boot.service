@@ -1,8 +1,7 @@
 [Unit]
-Description=early boot script
+Description=Set brightness to max on boot
 DefaultDependencies=no
 After=systemd-udev-settle.service
-Before=display-manager.service
 
 [Service]
 Type=oneshot
@@ -10,4 +9,3 @@ ExecStart=/usr/local/lib/early-boot.sh
 
 [Install]
 WantedBy=sysinit.target
-

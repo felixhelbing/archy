@@ -140,7 +140,7 @@ mount "$EFI" /mnt/boot
 # --- install base system ---
 PACSTRAP_PKGS=(base base-devel linux linux-firmware networkmanager sudo git
   mesa hyprland uwsm xdg-desktop-portal-hyprland xdg-desktop-portal
-  rofi ghostty neovim emacs waybar)
+  rofi ghostty neovim emacs waybar pipewire pipewire-pulse)
 [[ -n "$UCPKG" ]] && PACSTRAP_PKGS+=("$UCPKG")
 
 pacstrap -K /mnt "${PACSTRAP_PKGS[@]}"
@@ -181,6 +181,11 @@ echo 'archpc' > /etc/hostname
 systemctl enable NetworkManager
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 CHROOT
+
+# --- system files (services, scripts) ---
+cp -a /usr/share/installer/system/. /mnt/
+chmod +x /mnt/usr/local/lib/early-boot.sh
+arch-chroot /mnt systemctl enable early-boot.service
 
 # --- bootloader ---
 arch-chroot /mnt bootctl install

@@ -6,4 +6,12 @@ trap 'rm -rf "$BUILDDIR"' EXIT
 
 git clone https://aur.archlinux.org/librewolf-bin.git "$BUILDDIR/librewolf-bin"
 cd "$BUILDDIR/librewolf-bin"
+
+# PGP-Keys aus dem PKGBUILD importieren
+# shellcheck disable=SC1091
+source PKGBUILD
+for key in "${validpgpkeys[@]}"; do
+  gpg --recv-keys "$key"
+done
+
 makepkg -si
