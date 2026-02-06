@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+
+BUILDDIR="$(mktemp -d)"
+trap 'rm -rf "$BUILDDIR"' EXIT
+
+git clone https://aur.archlinux.org/brave-bin.git "$BUILDDIR/brave-bin"
+cd "$BUILDDIR/brave-bin"
+makepkg -si

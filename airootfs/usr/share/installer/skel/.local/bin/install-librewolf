@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+
+BUILDDIR="$(mktemp -d)"
+trap 'rm -rf "$BUILDDIR"' EXIT
+
+git clone https://aur.archlinux.org/librewolf-bin.git "$BUILDDIR/librewolf-bin"
+cd "$BUILDDIR/librewolf-bin"
+makepkg -si
