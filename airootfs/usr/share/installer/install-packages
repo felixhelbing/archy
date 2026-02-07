@@ -1,5 +1,7 @@
 base
 base-devel
+cryptsetup
+efibootmgr
 linux
 linux-firmware
 networkmanager
