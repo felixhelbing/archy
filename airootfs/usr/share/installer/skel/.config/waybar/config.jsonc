@@ -5,7 +5,7 @@
 
   "modules-left": ["hyprland/workspaces"],
   "modules-center": ["hyprland/window"],
-  "modules-right": ["network", "backlight", "pulseaudio", "battery", "clock"],
+  "modules-right": ["network#ip", "network#signal", "backlight", "pulseaudio", "battery", "clock#date", "clock#time"],
 
   "hyprland/workspaces": {
     "format": "{id}"
@@ -15,9 +15,14 @@
     "max-length": 50
   },
 
-  "clock": {
-    "format": "{:%Y-%m-%d  %H.%M}",
-    "tooltip-format": "{:%A, %d. %B %Y}"
+  "clock#date": {
+    "format": "{:%Y-%m-%d}",
+    "tooltip": false
+  },
+
+  "clock#time": {
+    "format": "{:%H.%M}",
+    "tooltip": false
   },
 
   "battery": {
@@ -32,10 +37,17 @@
     "format": "{percent}%"
   },
 
-  "network": {
-    "format-wifi": "{ipaddr}  {signalStrength}%",
+  "network#ip": {
+    "format-wifi": "{ipaddr}",
     "format-ethernet": "{ipaddr}",
     "format-disconnected": "offline",
+    "tooltip": false
+  },
+
+  "network#signal": {
+    "format-wifi": "{signalStrength}%",
+    "format-ethernet": "",
+    "format-disconnected": "",
     "tooltip": false
   },
 

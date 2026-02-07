@@ -180,6 +180,7 @@ echo 'KEYMAP=us' > /etc/vconsole.conf
 echo 'archpc' > /etc/hostname
 systemctl enable NetworkManager
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+sed -i '/^#\[multilib\]/{s/^#//;n;s/^#//}' /etc/pacman.conf
 CHROOT
 
 # --- system files (services, scripts) ---
