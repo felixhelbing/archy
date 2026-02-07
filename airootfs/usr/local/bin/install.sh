@@ -65,8 +65,11 @@ fi
 
 # --- partition (UEFI) ---
 echo "== Partitioning $DISK =="
+echo "Wiping partition table..."
 sgdisk --zap-all "$DISK"
+echo "Creating EFI partition..."
 sgdisk -n 1:0:+512MiB -t 1:EF00 -c 1:"EFI" "$DISK"
+echo "Creating root partition..."
 sgdisk -n 2:0:0        -t 2:8300 -c 2:"cryptroot" "$DISK"
 partprobe "$DISK"
 
@@ -84,18 +87,23 @@ for _ in {1..50}; do
 done
 [[ -b "$EFI" && -b "$ROOT" ]] || die "Partitions not found."
 
+echo "== Formatting =="
 mkfs.fat -F32 "$EFI"
 
+echo "== Encrypting root partition =="
 printf "%s" "$LUKS_PW" | cryptsetup luksFormat --type luks2 "$ROOT" -
 printf "%s" "$LUKS_PW" | cryptsetup open "$ROOT" cryptroot -
 
 mkfs.ext4 -F /dev/mapper/cryptroot
 
+echo "== Mounting =="
 mount /dev/mapper/cryptroot /mnt
 mkdir -p /mnt/boot
 mount "$EFI" /mnt/boot
 
 # --- install base system ---
+echo "== Installing packages =="
+pacman-key --init &>/dev/null
 mapfile -t PACSTRAP_PKGS < <(grep -v '^#' /usr/share/installer/install-packages | grep .)
 
 pacstrap -C /usr/share/installer/pacman-offline.conf -G /mnt "${PACSTRAP_PKGS[@]}"
@@ -115,7 +123,7 @@ chmod +x "$INSTALLER_SKEL_DST"/.local/bin/install-librewolf
 
 ROOT_UUID="$(blkid -s UUID -o value "$ROOT")"
 
-# --- base config ---
+echo "== Configuring system =="
 arch-chroot /mnt /bin/bash -e <<'CHROOT'
 set -euo pipefail
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
@@ -135,7 +143,7 @@ cp -a /usr/share/installer/system/. /mnt/
 chmod +x /mnt/usr/local/lib/early-boot.sh
 arch-chroot /mnt systemctl enable early-boot.service
 
-# --- bootloader ---
+echo "== Installing bootloader =="
 arch-chroot /mnt bootctl install
 
 cat > /mnt/boot/loader/loader.conf <<'LDR'
@@ -164,13 +172,13 @@ UC_LINE=""
   echo "options cryptdevice=UUID=${ROOT_UUID}:cryptroot root=/dev/mapper/cryptroot rw"
 } > /mnt/boot/loader/entries/arch-fallback.conf
 
-# --- mkinitcpio ---
+echo "== Building initramfs =="
 arch-chroot /mnt /bin/bash -e <<'CHROOT'
 sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)/' /etc/mkinitcpio.conf
 mkinitcpio -P
 CHROOT
 
-# --- swapfile ---
+echo "== Creating swapfile =="
 arch-chroot /mnt /bin/bash -e <<'CHROOT'
 SWAP_GIB=8
 if ! grep -q '^/swapfile ' /etc/fstab; then
@@ -181,7 +189,7 @@ if ! grep -q '^/swapfile ' /etc/fstab; then
 fi
 CHROOT
 
-# --- create user LAST ---
+echo "== Creating user =="
 arch-chroot /mnt /bin/bash -e <<CHROOT
 useradd -m -G wheel "$USERNAME"
 echo "$USERNAME:$USER_PW" | chpasswd
