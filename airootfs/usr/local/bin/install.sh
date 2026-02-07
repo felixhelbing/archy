@@ -98,7 +98,7 @@ mount "$EFI" /mnt/boot
 # --- install base system ---
 mapfile -t PACSTRAP_PKGS < <(grep -v '^#' /usr/share/installer/install-packages | grep .)
 
-pacstrap -C /usr/share/installer/pacman-offline.conf /mnt "${PACSTRAP_PKGS[@]}"
+pacstrap -C /usr/share/installer/pacman-offline.conf -G /mnt "${PACSTRAP_PKGS[@]}"
 genfstab -U /mnt >> /mnt/etc/fstab
 
 
