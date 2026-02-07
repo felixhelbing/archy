@@ -103,7 +103,6 @@ mount "$EFI" /mnt/boot
 
 # --- install base system ---
 echo "== Installing packages =="
-pacman-key --init &>/dev/null
 mapfile -t PACSTRAP_PKGS < <(grep -v '^#' /usr/share/installer/install-packages | grep .)
 
 pacstrap -C /usr/share/installer/pacman-offline.conf -G /mnt "${PACSTRAP_PKGS[@]}"
@@ -197,4 +196,5 @@ CHROOT
 
 # --- SUCCESS ---
 trap - EXIT
-echo "Install done. Rebooting is safe now."
+echo "Install done. Rebooting..."
+reboot
