@@ -16,47 +16,9 @@ cleanup() {
 trap cleanup EXIT
 
 # --- preflight ---
-for c in lsblk sgdisk partprobe mkfs.fat mkfs.ext4 cryptsetup pacstrap genfstab arch-chroot blkid awk sed dd mountpoint ping; do
+for c in lsblk sgdisk partprobe mkfs.fat mkfs.ext4 cryptsetup pacstrap genfstab arch-chroot blkid awk sed dd mountpoint; do
   require "$c"
 done
-
-# --- network (ethernet first, wifi via iwctl if needed) ---
-ensure_network() {
-  # Fast path: already online
-  if ping -c 1 -W 1 archlinux.org >/dev/null 2>&1; then
-    return 0
-  fi
-
-  echo
-  echo "No working internet connection detected."
-  echo "If you have Ethernet, plug it in now. Otherwise connect via WiFi."
-  echo
-
-  # Try again after user has a chance to plug Ethernet
-  sleep 2
-  if ping -c 1 -W 1 archlinux.org >/dev/null 2>&1; then
-    return 0
-  fi
-
-  # WiFi fallback using iwd
-  require iwctl
-  echo "Launching iwctl for WiFi setup. When connected, exit iwctl."
-  echo "Tip: station <wlanX> scan ; station <wlanX> get-networks ; station <wlanX> connect <SSID>"
-  echo
-  iwctl
-
-  # Verify connectivity (try a couple of times to allow DHCP)
-  for _ in {1..10}; do
-    if ping -c 1 -W 1 archlinux.org >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
-  done
-
-  die "Still no internet after WiFi setup."
-}
-
-ensure_network
 
 # --- disk selection (filter out USB + removable) ---
 echo "== Disks (USB filtered out) =="
@@ -138,12 +100,9 @@ mkdir -p /mnt/boot
 mount "$EFI" /mnt/boot
 
 # --- install base system ---
-PACSTRAP_PKGS=(base base-devel linux linux-firmware networkmanager sudo git
-  mesa hyprland uwsm xdg-desktop-portal-hyprland xdg-desktop-portal
-  rofi ghostty neovim emacs waybar pipewire pipewire-pulse openssh)
-[[ -n "$UCPKG" ]] && PACSTRAP_PKGS+=("$UCPKG")
+mapfile -t PACSTRAP_PKGS < <(grep -v '^#' /usr/share/installer/install-packages | grep .)
 
-pacstrap -K /mnt "${PACSTRAP_PKGS[@]}"
+pacstrap -C /usr/share/installer/pacman-offline.conf -K /mnt "${PACSTRAP_PKGS[@]}"
 genfstab -U /mnt >> /mnt/etc/fstab
 
 

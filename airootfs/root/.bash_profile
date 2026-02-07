@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # Nur einmal pro Boot ausführen (verhindert Loops)
 if [ -e /run/installer-ran ]; then
   return
@@ -11,6 +9,4 @@ touch /run/installer-ran
   echo
   echo "Installer failed. Dropping to shell."
   echo "Run: /usr/local/bin/install.sh"
-  /bin/bash
 }
-
