@@ -22,7 +22,7 @@ jobs:
           pkgs=$(grep -v '^#' airootfs/usr/share/installer/install-packages | xargs)
           pacman -Syw --cachedir airootfs/opt/offline-repo --noconfirm $pkgs
           repo-add airootfs/opt/offline-repo/offline.db.tar.gz \
-            airootfs/opt/offline-repo/*.pkg.tar.*
+            airootfs/opt/offline-repo/*.pkg.tar.zst
       - name: Build ISO
         run: mkarchiso -v -o out .
       - uses: actions/upload-artifact@v4
