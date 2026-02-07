@@ -18,6 +18,7 @@ jobs:
           pacman -Syu --noconfirm archlinux-keyring archiso
       - name: Download offline packages
         run: |
+          mkdir -p airootfs/opt/offline-repo
           pkgs=$(grep -v '^#' airootfs/usr/share/installer/install-packages | xargs)
           pacman -Syw --cachedir airootfs/opt/offline-repo --noconfirm $pkgs
           repo-add airootfs/opt/offline-repo/offline.db.tar.gz \
