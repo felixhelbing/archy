@@ -19,6 +19,7 @@ jobs:
       - name: Download offline packages
         run: |
           mkdir -p airootfs/opt/offline-repo /tmp/blank/var/lib/pacman
+          cp -a /etc/pacman.d/gnupg /tmp/blank/etc/pacman.d/gnupg
           pkgs=$(grep -v '^#' airootfs/usr/share/installer/install-packages | xargs)
           pacman -Syw -r /tmp/blank --cachedir airootfs/opt/offline-repo --noconfirm $pkgs
           repo-add airootfs/opt/offline-repo/offline.db.tar.gz \
