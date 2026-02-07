@@ -51,12 +51,9 @@ fi
 
 DISK="$(echo "${DISK_LINES[$IDX]}" | awk '{print $1}')"
 
-read -rsp "LUKS password: " LUKS_PW; echo
-
-read -rp "Username: " USERNAME
-[[ "$USERNAME" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "Invalid username."
-
-read -rsp "User password: " USER_PW; echo
+LUKS_PW="foo"
+USERNAME="q"
+USER_PW="foo"
 
 # --- CPU microcode selection ---
 UCPKG=""
@@ -91,7 +88,6 @@ mkfs.fat -F32 "$EFI"
 
 printf "%s" "$LUKS_PW" | cryptsetup luksFormat --type luks2 "$ROOT" -
 printf "%s" "$LUKS_PW" | cryptsetup open "$ROOT" cryptroot -
-unset LUKS_PW LUKS_PW2
 
 mkfs.ext4 -F /dev/mapper/cryptroot
 
@@ -102,7 +98,7 @@ mount "$EFI" /mnt/boot
 # --- install base system ---
 mapfile -t PACSTRAP_PKGS < <(grep -v '^#' /usr/share/installer/install-packages | grep .)
 
-pacstrap -C /usr/share/installer/pacman-offline.conf -K /mnt "${PACSTRAP_PKGS[@]}"
+pacstrap -C /usr/share/installer/pacman-offline.conf /mnt "${PACSTRAP_PKGS[@]}"
 genfstab -U /mnt >> /mnt/etc/fstab
 
 
@@ -116,14 +112,6 @@ mkdir -p "$INSTALLER_SKEL_DST"
 cp -a "$INSTALLER_SKEL_SRC"/. "$INSTALLER_SKEL_DST"/
 chmod +x "$INSTALLER_SKEL_DST"/.local/bin/install-brave
 chmod +x "$INSTALLER_SKEL_DST"/.local/bin/install-librewolf
-
-# --- stash secrets AFTER pacstrap ---
-SECRETS_DIR="/mnt/root/.install-secrets"
-mkdir -p "$SECRETS_DIR"
-chmod 700 "$SECRETS_DIR"
-install -m 600 /dev/null "$SECRETS_DIR/chpasswd"
-printf "%s:%s\n" "$USERNAME" "$USER_PW" > "$SECRETS_DIR/chpasswd"
-unset USER_PW USER_PW2
 
 ROOT_UUID="$(blkid -s UUID -o value "$ROOT")"
 
@@ -194,12 +182,9 @@ fi
 CHROOT
 
 # --- create user LAST ---
-arch-chroot /mnt /bin/bash -e <<'CHROOT'
-USERNAME="$(cut -d: -f1 /root/.install-secrets/chpasswd)"
+arch-chroot /mnt /bin/bash -e <<CHROOT
 useradd -m -G wheel "$USERNAME"
-chpasswd < /root/.install-secrets/chpasswd
-rm -f /root/.install-secrets/chpasswd
-rmdir /root/.install-secrets 2>/dev/null || true
+echo "$USERNAME:$USER_PW" | chpasswd
 CHROOT
 
 # --- SUCCESS ---

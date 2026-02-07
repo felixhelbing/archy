@@ -10,6 +10,8 @@ jobs:
     container:
       image: archlinux:latest
       options: --privileged
+    env:
+      TZ: Europe/Berlin
     steps:
       - uses: actions/checkout@v4
       - name: Setup
