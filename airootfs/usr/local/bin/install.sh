@@ -117,6 +117,7 @@ INSTALLER_SKEL_DST="/mnt/etc/skel"
 
 mkdir -p "$INSTALLER_SKEL_DST"
 cp -a "$INSTALLER_SKEL_SRC"/. "$INSTALLER_SKEL_DST"/
+chmod +x "$INSTALLER_SKEL_DST"/.local/bin/init-pacman
 chmod +x "$INSTALLER_SKEL_DST"/.local/bin/install-brave
 chmod +x "$INSTALLER_SKEL_DST"/.local/bin/install-librewolf
 
