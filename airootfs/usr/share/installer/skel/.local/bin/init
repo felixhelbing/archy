@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+sudo pacman-key --init
+sudo pacman-key --populate
+sudo pacman -Syu
+if [[ ! -f ~/.ssh/id_ed25519 ]]; then
+  ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+fi
+echo "SSH public key:"
+cat ~/.ssh/id_ed25519.pub

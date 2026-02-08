@@ -20,5 +20,7 @@ waybar
 pipewire
 pipewire-pulse
 openssh
+eza
+wl-clipboard
 intel-ucode
 amd-ucode
