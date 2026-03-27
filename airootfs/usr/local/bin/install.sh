@@ -24,23 +24,25 @@ done
 echo "== Disks (USB filtered out) =="
 
 mapfile -t DISK_LINES < <(
-  lsblk -dpno NAME,SIZE,MODEL,TYPE,TRAN,RM \
-  | awk '$4=="disk" && $5!="usb" && $6==0 {print}'
+  lsblk -dpPo NAME,SIZE,MODEL,TYPE,TRAN,RM \
+  | awk -F'"' '/TYPE="disk"/ && !/TRAN="usb"/ && /RM="0"/ {print}'
 )
 
 ((${#DISK_LINES[@]})) || die "No suitable non-USB disks found."
 
+pval() { echo "$1" | sed -n "s/.*$2=\"\([^\"]*\)\".*/\1/p"; }
+
 if (( ${#DISK_LINES[@]} == 1 )); then
   IDX=0
-  name="$(echo "${DISK_LINES[0]}" | awk '{print $1}')"
-  size="$(echo "${DISK_LINES[0]}" | awk '{print $2}')"
-  model="$(echo "${DISK_LINES[0]}" | cut -d' ' -f3- | sed 's/  *disk .*//')"
+  name="$(pval "${DISK_LINES[0]}" NAME)"
+  size="$(pval "${DISK_LINES[0]}" SIZE)"
+  model="$(pval "${DISK_LINES[0]}" MODEL)"
   echo "One disk found: $name ($size, $model)"
 else
   for i in "${!DISK_LINES[@]}"; do
-    name="$(echo "${DISK_LINES[$i]}" | awk '{print $1}')"
-    size="$(echo "${DISK_LINES[$i]}" | awk '{print $2}')"
-    model="$(echo "${DISK_LINES[$i]}" | cut -d' ' -f3- | sed 's/  *disk .*//')"
+    name="$(pval "${DISK_LINES[$i]}" NAME)"
+    size="$(pval "${DISK_LINES[$i]}" SIZE)"
+    model="$(pval "${DISK_LINES[$i]}" MODEL)"
     printf "[%d] %s  (%s, %s)\n" "$i" "$name" "$size" "$model"
   done
 
@@ -49,7 +51,7 @@ else
   (( IDX < ${#DISK_LINES[@]} )) || die "Out of range."
 fi
 
-DISK="$(echo "${DISK_LINES[$IDX]}" | awk '{print $1}')"
+DISK="$(pval "${DISK_LINES[$IDX]}" NAME)"
 
 LUKS_PW="foo"
 USERNAME="q"
